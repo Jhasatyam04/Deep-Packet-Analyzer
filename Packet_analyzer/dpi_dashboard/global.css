@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .glass-card {
+    @apply bg-card border border-cardBorder rounded-2xl overflow-hidden;
+  }
+}

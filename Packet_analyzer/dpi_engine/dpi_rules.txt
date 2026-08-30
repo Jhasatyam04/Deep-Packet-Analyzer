@@ -1,0 +1,15 @@
+[BLOCKED_IPS]
+
+[BLOCKED_APPS]
+
+[THROTTLED_APPS]
+
+[BLOCKED_DOMAINS]
+instagram.com
+https://www.reddit.com/
+github.com
+https://www.netflix.com/in/
+example.com
+reddit.com
+
+[BLOCKED_PORTS]
