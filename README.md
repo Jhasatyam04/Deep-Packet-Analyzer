@@ -65,6 +65,3 @@ npm run web
 ## Important Networking Limitations
 
 * **HTTP/3 (QUIC):** Modern browsers aggressively use QUIC (UDP) for sites like Google, YouTube, and Reddit. Because QUIC encrypts the SNI payload and uses connectionless UDP, a passive out-of-band injector cannot easily "reset" the connection. To test blocking on QUIC-enabled sites, you must disable the `Experimental QUIC protocol` flag in your browser to force a fallback to standard TCP TLS 1.3.
-
-## License
-MIT
