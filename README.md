@@ -16,7 +16,7 @@ Traditional network monitoring tools are often purely passive loggers (like Wire
 | **TCP RST Injector** | Actively forges and injects TCP Reset packets to tear down blocked connections. |
 | **Network Protection Dashboard** | Real-time visualization of network health, processed packets, and blocked threats. |
 
-## The Four Core Principles of the Architecture
+## System Architecture
 
 ### 1. High-Performance Packet Sniffing
 **Bind locally, process globally.** 
