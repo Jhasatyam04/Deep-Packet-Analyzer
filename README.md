@@ -1,4 +1,4 @@
-# Deep Packet Analyser
+# Deep Packet Analyzer
 
 > An enterprise-grade passive Intrusion Prevention System (IPS) and Deep Packet Inspection (DPI) engine built with Java and React.js.
 
@@ -8,7 +8,7 @@ Traditional network monitoring tools are often purely passive loggers (like Wire
 
 ## The Solution
 
-**Deep Packet Analyser** is a passive, out-of-band DPI engine that sniffs traffic directly on the wire, extracts TLS SNI in real-time, and actively kills unauthorized connections by injecting forged TCP Reset (RST) packets. All telemetry and threat mitigations are streamed to a stunning, modern dark-navy flat-design React.js dashboard.
+**Deep Packet Analyzer** is a passive, out-of-band DPI engine that sniffs traffic directly on the wire, extracts TLS SNI in real-time, and actively kills unauthorized connections by injecting forged TCP Reset (RST) packets. All telemetry and threat mitigations are streamed to a stunning, modern dark-navy flat-design React.js dashboard.
 
 | Component | Responsibility |
 |-----------|----------------|

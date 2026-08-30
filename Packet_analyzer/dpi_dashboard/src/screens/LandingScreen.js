@@ -5,7 +5,7 @@ export default function LandingScreen({ onNavigate }) {
   return (
     <ScrollView className="flex-1 bg-background">
       <View className="flex-row justify-between items-center px-10 py-6">
-        <Text className="text-primaryText font-sans text-xl font-bold">Deep Packet Analyser</Text>
+        <Text className="text-primaryText font-sans text-xl font-bold">Deep Packet Analyzer</Text>
         <View className="flex-row space-x-8 hidden md:flex">
           <Text className="text-secondaryText font-sans text-sm">Features</Text>
           <Text className="text-secondaryText font-sans text-sm">Control</Text>
