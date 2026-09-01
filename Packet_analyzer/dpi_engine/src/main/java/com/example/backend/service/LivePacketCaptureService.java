@@ -24,12 +24,38 @@ public class LivePacketCaptureService {
     private DeepPacketInspectionEngine engine;
     public LivePacketCaptureService(BlockingRuleManager ruleManager) {
         this.ruleManager = ruleManager;
+        DeepPacketInspectionEngine.Config config = new DeepPacketInspectionEngine.Config();
+        this.engine = new DeepPacketInspectionEngine(config, ruleManager);
+        this.engine.initialize();
+        this.engine.startLive();
     }
     public boolean isRunning() {
         return isRunning.get();
     }
     public DeepPacketInspectionEngine getEngine() {
         return engine;
+    }
+    public void simulateLiveTraffic(String pcapFile) {
+        Thread simThread = new Thread(() -> {
+            System.out.println("[LiveIDS] Simulating live traffic from " + pcapFile);
+            com.dpi.packet.PcapFileReader reader = new com.dpi.packet.PcapFileReader();
+            if (!reader.open(pcapFile)) {
+                System.err.println("[LiveIDS] Failed to open PCAP for simulation");
+                return;
+            }
+            com.dpi.packet.RawPacket raw = new com.dpi.packet.RawPacket();
+            while (reader.readNextPacket(raw)) {
+                engine.processLivePacket(raw);
+                try {
+                    Thread.sleep(10); 
+                } catch (InterruptedException e) {
+                    break;
+                }
+            }
+            reader.close();
+            System.out.println("[LiveIDS] Finished simulating traffic from " + pcapFile);
+        }, "TrafficSimulator");
+        simThread.start();
     }
     public void startLiveCapture() {
         if (isRunning.get()) return;
@@ -68,11 +94,6 @@ public class LivePacketCaptureService {
             captureHandle.setFilter("tcp", BpfProgram.BpfCompileMode.OPTIMIZE);
             PcapHandle sendHandle = nif.openLive(snapLen, PcapNetworkInterface.PromiscuousMode.PROMISCUOUS, timeout);
             TcpRstInjector rstInjector = new TcpRstInjector(sendHandle);
-            DeepPacketInspectionEngine.Config config = new DeepPacketInspectionEngine.Config();
-            this.engine = new DeepPacketInspectionEngine(config, ruleManager);
-            if (!engine.initialize()) {
-                throw new RuntimeException("Failed to init DPI engine for live capture");
-            }
             isRunning.set(true);
             engine.setCustomOutputHandler((job, action) -> {
                 if (action == PacketAction.DROP) {
@@ -111,7 +132,6 @@ public class LivePacketCaptureService {
                 }
             }, "LiveCapture");
             captureThread.start();
-            engine.startLive();
             System.out.println("[LiveIDS] Live network capture started.");
         } catch (Exception e) {
             e.printStackTrace();

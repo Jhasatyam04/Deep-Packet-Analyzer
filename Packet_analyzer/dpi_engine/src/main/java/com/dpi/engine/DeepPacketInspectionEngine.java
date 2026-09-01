@@ -26,6 +26,16 @@ public class DeepPacketInspectionEngine {
     private final AtomicBoolean running = new AtomicBoolean(false);
     private Thread readerThread;
     private Thread statsThread;
+    
+    public static class TimeSeriesPoint {
+        public String ts;
+        public long packets;
+        public long bytes;
+        public long forwarded;
+        public long dropped;
+    }
+    private final java.util.LinkedList<TimeSeriesPoint> timeseries = new java.util.LinkedList<>();
+
     public DeepPacketInspectionEngine(Config config, BlockingRuleManager ruleManager) {
         this.config = config;
         this.ruleManager = ruleManager;
@@ -205,6 +215,19 @@ public class DeepPacketInspectionEngine {
                 double dropRate = total > 0 ? (100.0 * dropped / total) : 0.0;
                 System.out.printf("[Live Stats] Processed: %d | Forwarded: %d | Dropped: %d | Drop Rate: %.2f%%%n", 
                         total, forwarded, dropped, dropRate);
+                
+                TimeSeriesPoint point = new TimeSeriesPoint();
+                point.ts = java.time.Instant.now().toString();
+                point.packets = total;
+                point.bytes = stats.totalBytes.get();
+                point.forwarded = forwarded;
+                point.dropped = dropped;
+                synchronized (timeseries) {
+                    timeseries.add(point);
+                    if (timeseries.size() > 32) {
+                        timeseries.removeFirst();
+                    }
+                }
             } catch (InterruptedException e) {
                 break;
             }
@@ -290,4 +313,12 @@ public class DeepPacketInspectionEngine {
     }
     public DpiStatistics getStats() { return stats; }
     public Config getConfig() { return config; }
+    public AggregatedConnectionStatistics getGlobalConnTable() { return globalConnTable; }
+    public FastPathProcessorPool getFpPool() { return fpPool; }
+    public LoadBalancerPool getLbPool() { return lbPool; }
+    public java.util.List<TimeSeriesPoint> getTimeseries() {
+        synchronized (timeseries) {
+            return new java.util.ArrayList<>(timeseries);
+        }
+    }
 }

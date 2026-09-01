@@ -30,27 +30,74 @@ public class LiveCaptureController {
         return ResponseEntity.ok(Map.of("message", "Live capture stopped successfully"));
     }
     @GetMapping("/status")
-    public ResponseEntity<Map<String, Boolean>> getStatus() {
-        return ResponseEntity.ok(Map.of("isRunning", liveCaptureService.isRunning()));
+    public ResponseEntity<Map<String, Object>> getStatus() {
+        boolean running = liveCaptureService.isRunning();
+        Map<String, Object> status = new HashMap<>();
+        status.put("isRunning", running);
+        status.put("name", "DPI Engine (Backend)");
+        status.put("version", "2.0.0");
+        status.put("status", running ? "online" : "idle");
+        status.put("capture", running ? "Live Interface" : null);
+        status.put("lastUpdated", java.time.Instant.now().toString());
+        status.put("uptimeSeconds", 1000); 
+        status.put("connected", true);
+        return ResponseEntity.ok(status);
     }
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Object>> getStats() {
-        if (!liveCaptureService.isRunning() || liveCaptureService.getEngine() == null) {
-            return ResponseEntity.ok(Map.of());
+        if (liveCaptureService.getEngine() == null) {
+            Map<String, Object> empty = new HashMap<>();
+            Map<String, Object> emptyOverview = new HashMap<>();
+            emptyOverview.put("totalPackets", 0);
+            emptyOverview.put("packetsPerSec", 0);
+            emptyOverview.put("totalBytes", 0);
+            emptyOverview.put("throughputBps", 0);
+            emptyOverview.put("forwardedPackets", 0);
+            emptyOverview.put("forwardedPercent", 0);
+            emptyOverview.put("droppedPackets", 0);
+            emptyOverview.put("droppedPercent", 0);
+            emptyOverview.put("activeFlows", 0);
+            emptyOverview.put("detectedApplications", 0);
+            emptyOverview.put("detectedDomains", 0);
+            empty.put("overview", emptyOverview);
+            empty.put("timeseries", java.util.List.of());
+            return ResponseEntity.ok(empty);
         }
         DpiStatistics stats = liveCaptureService.getEngine().getStats();
         Map<String, Object> response = new HashMap<>();
         long total = stats.totalPackets.get();
         long dropped = stats.droppedPackets.get();
-        double dropRate = total > 0 ? ((double) dropped / total) * 100.0 : 0.0;
-        response.put("totalPackets", total);
-        response.put("totalBytes", stats.totalBytes.get());
-        response.put("tcpPackets", stats.tcpPackets.get());
-        response.put("udpPackets", stats.udpPackets.get());
-        response.put("forwarded", stats.forwardedPackets.get());
-        response.put("dropped", dropped);
-        response.put("dropRate", dropRate);
-        response.put("classificationsJson", "Live mode active");
+        long forwarded = stats.forwardedPackets.get();
+        double droppedPercent = total > 0 ? ((double) dropped / total) * 100.0 : 0.0;
+        double forwardedPercent = total > 0 ? ((double) forwarded / total) * 100.0 : 0.0;
+        
+        Map<String, Object> overview = new HashMap<>();
+        overview.put("totalPackets", total);
+        overview.put("packetsPerSec", 0); 
+        overview.put("totalBytes", stats.totalBytes.get());
+        overview.put("throughputBps", 0);
+        overview.put("forwardedPackets", forwarded);
+        overview.put("forwardedPercent", forwardedPercent);
+        overview.put("droppedPackets", dropped);
+        overview.put("droppedPercent", droppedPercent);
+        overview.put("activeFlows", liveCaptureService.getEngine().getGlobalConnTable().getAllConnections().size());
+        var connections = liveCaptureService.getEngine().getGlobalConnTable().getAllConnections();
+        java.util.Set<String> uniqueApps = new java.util.HashSet<>();
+        java.util.Set<String> uniqueDomains = new java.util.HashSet<>();
+        for (com.dpi.core.Connection c : connections) {
+            if (c.getAppType() != null && c.getAppType() != com.dpi.core.AppType.UNKNOWN) {
+                uniqueApps.add(c.getAppType().name());
+            }
+            if (c.getSni() != null && !c.getSni().isEmpty()) {
+                uniqueDomains.add(c.getSni());
+            }
+        }
+        
+        overview.put("detectedApplications", uniqueApps.size());
+        overview.put("detectedDomains", uniqueDomains.size());
+
+        response.put("overview", overview);
+        response.put("timeseries", liveCaptureService.getEngine().getTimeseries());
         return ResponseEntity.ok(response);
     }
 }

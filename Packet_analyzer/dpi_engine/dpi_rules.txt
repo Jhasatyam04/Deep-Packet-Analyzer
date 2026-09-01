@@ -8,6 +8,7 @@
 instagram.com
 https://www.reddit.com/
 github.com
+badsite.com
 https://www.netflix.com/in/
 example.com
 reddit.com

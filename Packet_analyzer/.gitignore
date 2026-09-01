@@ -62,6 +62,8 @@ yarn-error.log*
 dist/
 build/
 target/
+.output/
+.vinxi/
 *.jar
 *.war
 *.ear

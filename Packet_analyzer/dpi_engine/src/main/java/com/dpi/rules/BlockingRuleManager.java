@@ -70,6 +70,27 @@ public class BlockingRuleManager {
             ipLock.readLock().unlock();
         }
     }
+    public List<String> getBlockedAppsList() {
+        appLock.readLock().lock();
+        try {
+            List<String> result = new ArrayList<>();
+            for (AppType app : blockedApps) result.add(app.displayName());
+            return result;
+        } finally {
+            appLock.readLock().unlock();
+        }
+    }
+    public List<String> getBlockedDomainsList() {
+        domainLock.readLock().lock();
+        try {
+            List<String> result = new ArrayList<>();
+            result.addAll(blockedDomains);
+            result.addAll(domainPatterns);
+            return result;
+        } finally {
+            domainLock.readLock().unlock();
+        }
+    }
     public void blockApp(AppType app) {
         appLock.writeLock().lock();
         try {

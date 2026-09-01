@@ -66,7 +66,8 @@ public enum AppType {
         if (sni == null || sni.isEmpty()) return UNKNOWN;
         String lower = sni.toLowerCase();
         if (lower.contains("youtube") || lower.contains("ytimg") ||
-            lower.contains("youtu.be") || lower.contains("yt3.ggpht")) {
+            lower.contains("youtu.be") || lower.contains("yt3.ggpht") || 
+            lower.contains("googlevideo")) {
             return YOUTUBE;
         }
         if (lower.contains("google") || lower.contains("gstatic") ||

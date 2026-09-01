@@ -19,6 +19,20 @@ public class AggregatedConnectionStatistics {
             lock.writeLock().unlock();
         }
     }
+    public List<Connection> getAllConnections() {
+        lock.readLock().lock();
+        try {
+            List<Connection> all = new ArrayList<>();
+            for (PerFlowConnectionTracker tracker : trackers) {
+                if (tracker != null) {
+                    all.addAll(tracker.getAllConnections());
+                }
+            }
+            return all;
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
     public String generateReport() {
         lock.readLock().lock();
         try {
